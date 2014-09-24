@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load equ_extras %}
+
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href='{% static "css/especificos_your_items.css" %}' />
+{% endblock extra_head %}
+
+{% block content %}
+
+<section class="presenta">
+    <div class="arriba">
+        <a id="logo_barra" href="#"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        <div class="texto-header">
+            <h1>Your Items</h1>
+            <p>You're a step away from uploading an item. Don’t forget to select the category it belongs to. You can always promote your offerings on social networks to get more chances of trading or selling your products. Just copy & paste the URL of an item to share it. You can upload as many items as you want!</p>
+        </div>
+    </div>
+</section>
+<div id="list_article" name="list_article">
+    {% if message %}
+        <div class="alert alert-info">{{ message|safe }}</div>
+    {% endif %}
+    <div class="formulario">
+        <div class="form-tittle primero">
+            <span class="number-tittle">●</span>
+            <h1>Items Details</h1>
+        </div>
+        <div class="form-fields">
+            <ul class="list_items">
+                {% for article in articles %}
+                    <li>
+                        <a href="{% url 'product_detail' article.id %}"><img width="80" height="80" src="{{ MEDIA_URL }}{{ article.imagearticle_set.all.0.image.thumbnail.url }}"></a>
+                        <div class="item_info">
+                            <h2 class="list_items-title"><a href="{% url 'product_detail' article.id %}">{{ article.name }}</a></h2>
+                            <p class="descrip">{{ article.description }}</p>
+                        </div>
+                        <span class="price">${{ article.price }}</span>
+                        <div class="buttons">
+                            <ul>
+                                <li><a class="btn cancel" href="{% url 'article_delete' article.id %}">Delete</a></li>
+                                <li><a class="btn" href="{% url 'modify_article' article.id %}">Edit</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+<aside class="categories">
+    <h1 class="titular-seccion"><span>Categories</span></h1>
+    <div class="grid col-4">
+        {% regroup categories by subcategories as categories_list %}
+            {% for cat in categories_list %}
+                <nav>
+                    <h2 class="category-tittle">{{ cat.grouper }}</h2>
+                    <ul>
+                        {% for subcat in cat.list %}
+                            <li>
+                                <form method="get" action="/search/.">
+                                    <input id="id_q" name="q" type="hidden" value="{{ subcat.name_category }}">
+                                    <button type="submit" class="search-link">{{ subcat.name_category }}</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>    
+            {% endfor %}
+    </div>
+</aside>
+{% endblock %}

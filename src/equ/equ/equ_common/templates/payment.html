@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+{% if watch %}
+<form action="" method="POST">
+    {% csrf_token %}
+    <script
+         src="https://checkout.stripe.com/v2/checkout.js" class="stripe-button"
+         data-key="pk_test_WDSzG0y8Q86jF1GJloHiCdqn"
+         data-amount="199"
+         data-name="EQUALLO"
+         data-description="1 widgets ($1.99)"
+         data-image='{% static "images/logo_bar.png" %}'>
+    </script>
+</form>
+{% endif %}
+{{ info }}
+{% endblock %}

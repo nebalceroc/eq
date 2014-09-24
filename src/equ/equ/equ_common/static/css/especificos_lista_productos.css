@@ -1,0 +1,161 @@
+@charset "UTF-8";
+/* CSS Document */
+
+.contenido{
+	margin:70px auto auto;
+}
+
+.presenta .arriba form{
+width: 768px;
+margin-left: 15px;
+margin-top:15px;
+}
+.arriba form input{
+	width: 650px;
+}
+.arriba{
+	height:auto;
+	margin-bottom:20px;
+}
+#circles_ani{
+	width: 58px;
+}
+#equallo{
+	width: 180px;
+}
+.related{
+	text-align:right;
+}
+.related span {
+color: #888;
+font-size: 12px;
+}
+.related ul {
+display: inline-block;
+}
+.related ul li {
+display: inline-block;
+margin-left: 20px;
+font-size: 13px;
+}
+.main {
+display: block;
+overflow: hidden;
+margin-top: 25px;
+}
+.main .categories {
+	margin-top:20px;
+width: 30%;
+float: left;
+display: block;
+}
+.resultados {
+display: block;
+margin-left: 0px;
+float: left;
+width: 70%;
+box-sizing: border-box;
+-moz-box-sizing: border-box;
+padding-left: 2%;
+}
+.main .grid.col-4 nav {
+width: 100%;
+margin-bottom: 30px;
+height: 100%;
+}
+.filtros {
+background: #f4f4f4;
+border: 1px solid #cecece;
+border-radius: 5px;
+padding: 10px;
+margin-bottom: 20px;
+}
+.filtros .orden {
+display: inline-block;
+float: right;
+}
+.filtros span{
+	color:#888;
+}
+.filtros span.result-num{
+	line-height:26px;
+}
+.result-num {
+font-size: 14px;
+}
+.orden span {
+font-size: 12px;
+}
+#search-results li {
+display: block;
+overflow: hidden;
+margin-bottom: 25px;
+}
+.product-image-thumb {
+padding: 8px 0px;
+margin-right: 20px;
+}
+.product-image-thumb a {
+	border: 1px solid rgb(7, 193, 209);
+	padding:10px;
+	display: inline-block;
+}
+.product-image-thumb img {
+max-width: 180px;
+}
+.product-description-thumb {
+margin-right: 20px;
+margin-top: 10px;
+}
+.product-description-thumb h2 {
+color: rgb(7, 193, 209);
+font-size: 17px;
+line-height: 24px;
+margin-bottom: 25px;
+}
+.product-description-thumb h2 a{
+	text-decoration:none;
+}
+.product-description-thumb h2 a:hover{
+	text-decoration:underline;
+}
+.product-description-thumb p {
+color: #666;
+font-size: 14px;
+line-height: 22px;
+max-height: 64px;
+overflow: hidden;
+}
+.product-price {
+width: 19%;
+}
+.product-price > span {
+color: #888;
+display: block;
+text-align: center;
+margin-bottom: 20px;
+}
+span.price {
+color: rgb(7, 193, 209);
+font-size: 25px;
+}
+
+.prev.oculto{
+	display:none;
+}
+
+.pagination li a {
+	cursor: pointer;
+}
+
+.pagination li a, .pagination li a:hover, .pagination li.disabled a, .pagination li.disabled a:hover {
+	font-family: Helvetica, sans-serif;
+	color: #717171;
+	background: #f4f4f4;
+	border: 1px solid #cecece;
+}
+
+.pagination li.active a, .pagination li.active a:hover {
+	background-color: rgb(7, 193, 209);
+	border-color:rgb(7, 193, 209);
+}

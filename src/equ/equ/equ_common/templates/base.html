@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<meta charset="UTF-8">
+<html>
+    <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link href="{% static 'images/favicon.ico' %}" type="image/x-ico" rel="shortcut icon">
+	<title>{% block title_page %}Equallo{% endblock %}</title>
+	<link href='http://fonts.googleapis.com/css?family=Amaranth' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Arimo:400,700,400italic' rel='stylesheet' type='text/css'>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src='{% static "js/jquery/jquery-1.8.2.min.js" %}'></script>-->
+        <!-- <msdropdown> -->
+    <link rel="stylesheet" type="text/css" href='{% static "css/msdropdown/dd.css" %}'/>
+        <!-- </msdropdown> -->
+        
+    <link rel="stylesheet" type="text/css" href='{% static "css/msdropdown/skin2.css" %}' />
+    <link rel="stylesheet" type="text/css" href='{% static "css/msdropdown/flags.css" %}'/>
+    <link rel="stylesheet" type="text/css" href='{% static "bootstrap3/css/bootstrap.min.css" %}'/>
+    <link rel="stylesheet" type="text/css" href='{% static "fontawesome/css/font-awesome.min.css" %}'/>
+    <link rel="stylesheet" type="text/css" href='{% static "css/general.css" %}'/>
+    <link rel="stylesheet" type="text/css" href='{% static "css/especificos_home.css" %}' />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}" />
+	{% block extra_head %}
+        {% endblock extra_head %}
+    </head>
+
+    <body>
+	{% block header %}
+	<header>
+	    <div class="nav_bar wrap">
+		  <div class="col-md-1">
+          <a id="logo" href="{% url 'home' %}">
+            <img src='{% static "images/logo_bar.png" %}' alt="Equallo exchange stuffs">
+            </a>
+        </div>
+        <div class="col-md-6">
+		  <div class="border"><form action="/search/." method="get" ><input id="id_q" name="q" placeholder="Search" type="text"></form></div>
+        </div>
+        <div class="col-md-5">
+		<nav>
+                    {% if user.is_authenticated %}
+		    <ul id="secundario">
+		        <li><a href="{% url 'article_up' %}">Upload your items</a></li>
+		    </ul>
+		    <ul id="principal">
+		        <li><a href="{% url 'list_trades' %}"><img src='{% static "images/excghanges_icon.png" %}'>
+                    {% if pending_requests %}
+                        <span id="exchanges_num" class="badge">{{ pending_requests|length }}</span> Trades</a>
+                    {% else %}
+                        <span id="exchanges_num" class="badge">0</span> Trades</a>
+                    {% endif %}
+                </li>
+                <li><a href="{% url 'your_items' %}"><img src='{% static "images/items_icon.png" %}'><span>Items</span></a></li>
+		        <li><a href="{% url 'profile_change' %}"><img src='{% static "images/user_icon.png" %}'><span>Profile</span></a></li>
+                <li><a href="{% url 'logout' %}"><img src='{% static "images/log_out.png" %}'><span>Log out</span></a></li>
+
+		    </ul>
+                    {% else %}
+            <ul id="secundario">
+		        <li><a href="{% url 'login' %}">Sign In</a></li>
+                <li class="register-now"><a href="{% url 'login' %}">Sign Up</a></li>
+		    </ul>
+            <!-- 
+            <ul id="principal">
+                <li><a href="{% url 'login' %}"><img src='{% static "images/user_icon.png" %}'><span>Sign Up</span></a></li>
+            </ul>
+            -->
+                    {% endif %}
+		    
+		</nav>
+    </div>
+	    </div>
+	</header>
+	<!--<section class="top wrap">
+	    <select name="countries" id="ubicacion" style="width:170px; float:right; margin-top:6px;">
+		<option value='us' data-image='{% static "images/msdropdown/icons/blank.gif" %}' data-imagecss="flag us" data-title="United States">United States</option>
+		<option value='co' data-image='{% static "images/msdropdown/icons/blank.gif" %}' data-imagecss="flag co" data-title="Colombia">Colombia</option>
+	    </select>
+	    <span class="location"><img src='{% static "images/map_pin.png" %}'> Country:</span>
+	</section>-->
+	{% endblock %}
+    <section class="contenido">
+        {% block content %}{% endblock %}
+    </section>
+    <section class="contenido">
+	{% block footer %}
+	<footer>
+        <h1 class="titular-seccion"><span>Company</span></h1>
+        <div class="arriba">
+    	    <nav>
+                <ul>
+                    <li><a href="#">About us</a></li>
+             	    <li><a href="#">News</a></li>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </nav>
+            <center>
+            <a href="#" id="logofooter"><img src='{% static "images/logo_footer.png" %}'></a>
+            </center>
+            <div class="redes">
+                <span>Follow us :</span>
+                <ul>
+                    <li><a href="https://www.facebook.com/Equallo"><img src='{% static "images/fb.png" %}'></a></li>
+                    <li><a href="https://twitter.com/LetsEquallo"><img src='{% static "images/tw.png" %}'></a></li>
+                    <li><a href="https://plus.google.com/u/0/114650806519300664500"><img src='{% static "images/g+.png" %}'></a></li>
+                    <li><a href="http://www.linkedin.com/company/equallo"><img src='{% static "images/in.png" %}'></a></li>
+                </ul>
+             </div>
+        </div>
+        <p class="copy">Copyright © 2013 Equallo Inc. All Rights Reserved.<br> Designated trademarks and brands are the property of their respective owners. Use of this Web site constitutes acceptance of the Equallo Inc. <a href="#" target="_blank">User Agreement</a> and <a href="#" target="_blank">Privacy Policy.</a></p>
+    </footer>
+        <div class="col-md-12 text-center">
+            <p class="d-mente">Powered By: <a href="http://www.d-mentecreativa.com" target="_blank">D-mente Creativa S.A.S.</a> and <a href="http://www.novcat.com.co" target="_blank">Novcat S.A.S.</a></p>
+        </div>
+	{% endblock %}
+    </section>
+    <script type="text/javascript" src='{% static "js/jquery-2.0.1.min.js" %}'></script>
+    <script type="text/javascript" src='{% static "js/script.js" %}'></script>
+    <script src='{% static "js/msdropdown/jquery.dd.min.js" %}'></script>
+    <script type="text/javascript" src='{% static "bootstrap3/js/bootstrap.min.js" %}'></script>
+    <script language="javascript">
+        $(document).ready(function(e) {
+        try {
+        $("body .top select").msDropDown();
+        } catch(e) {
+        alert(e.message);
+        }
+        });
+    </script>
+    {% block js %}{% endblock %}
+    </body>
+</html>

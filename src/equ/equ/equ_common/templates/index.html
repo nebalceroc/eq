@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section class="presenta">
+    <div class="arriba">
+        <div class="col-md-4">
+        	<a id="logo_barra" href="{% url 'home' %}"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        </div>
+        <div class="col-md-8">
+        	<form action="/search/." method="get" >
+                <input id="id_q" name="q" placeholder="What are you looking for?" type="text">
+                <button type="submit">Find it!</button>
+            </form>
+        </div>
+    </div>
+    <div class="explain">
+        <div class="steps">
+            <img src='{% static "images/step-1.png" %}'>
+            <h3><span>1</span>Sign up</h3>
+            <p>An exciting way to get what you want. Register, create a profile and upload your goods and services.</p>
+        </div>
+        <div class="steps">
+            <img src='{% static "images/step-2.png" %}'>
+            <h3><span>2</span>Search for stuff</h3>
+            <p>Trade video games, phones, books and much more. All you can imagine can be traded for good.</p>
+        </div>
+        <div class="steps">
+            <img src='{% static "images/step-3.png" %}'>
+            <h3><span>3</span>Standard fee</h3>
+            <p>Did you find something amazing? Get the contact info of the article you want for $1.99.</p>
+        </div>
+        <div class="steps">
+            <img src='{% static "images/step-4.png" %}'>
+            <h3><span>4</span>Lets Equallo</h3>
+            <p>No commission, no percentage. Just get what you are looking for!</p>
+        </div>
+    </div>
+    {% if not user.is_authenticated %}
+        <a id="call-to-action" href="{% url 'login'%}">Sign Up Now !</a>
+    {% endif %}
+   <!--  <p>“There is somebody out there who needs what you don’t need anymore.” Melissa Ryce<br>
+        “Upload your things for free. Trade them or sell them, that simple!” Ashira Anjali<br>
+        “Have something in your garage you don’t use anymore? Now its time to get something in return.” Luz Estella Lopez<br>
+        “Take advantage and start using Equallo!” Steven Valle CEO & Founder
+    </p> -->
+</section>
+<section class="con-borde">
+    <h1 class="titular-seccion"><span>Most Traded Categories</span></h1>
+    <div class="most-traded-cat">
+        <ul>
+            <li>
+                <a href="#">
+                    <div class="traded-cat cat-1">
+                        <div class="info-wrap">
+                            <div class="cat-info">
+                                <div class="cat-info-front cat-1"></div>
+                                <div class="cat-info-back">
+                                    <span class="cat-quest"><strong>Ready to play a little game?</strong></span>
+                                    <span class="cat-answer">Trade it and get it in Equallo!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="get" action="/search/." style="display:none;">
+                        <input id="id_q" name="q" value="Video Games &amp; Consoles">
+                    </form>
+            </a></li>
+            <li><a href="#">
+                    <div class="traded-cat cat-2">
+                        <div class="info-wrap">
+                            <div class="cat-info">
+                                <div class="cat-info-front cat-2"></div>
+                                <div class="cat-info-back">
+                                    <span class="cat-quest"><strong>Ready to start a new book?</strong></span>
+                                    <span class="cat-answer">Trade it and get it in Equallo!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="get" action="/search/." style="display:none;">
+                        <input id="id_q" name="q" value="Books">
+                    </form>
+            </a></li>
+            <li><a href="#">
+                    <div class="traded-cat cat-3">
+                        <div class="info-wrap">
+                            <div class="cat-info">
+                                <div class="cat-info-front cat-3"></div>
+                                <div class="cat-info-back">
+                                    <span class="cat-quest"><strong>Vintage lover?</strong></span>
+                                    <span class="cat-answer">Trade it and get it in Equallo!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="get" action="/search/." style="display:none;">
+                        <input id="id_q" name="q" value="Collectibles &amp; Memorabilia">
+                    </form>
+            </a></li>
+        </ul>
+    </div>
+</section>   
+{% if recent_articles %} 
+<section class="recently">
+    <h1 class="titular-seccion"><span>Recently Added Items</span></h1>
+    <div class="grid recent col-4">
+        {% for article in recent_articles %}
+            <article>
+                <div class="row">
+                    <a href="{% url 'product_detail' article.id %}">
+                        <div class="over"><span class="lupa"></span></div>
+                        <div class="product-image-container">
+                            <img id="prodimg-{{ article.id }}" class="product-image" src="{{ MEDIA_URL }}{{ article.imagearticle_set.all.0.image.large.url }}">
+                        </div>
+                        <input id="prodloc-{{ article.id }}" type="hidden" value="{{article.seller.city }}">
+                        <input id="prodprice-{{ article.id }}" type="hidden" value="{{ article.price }}">
+                    </a>
+                </div>
+                <div class="row">
+                    <a href="{% url 'product_detail' article.id %}" class="product-tittle"><h3 id="prodname-{{ article.id }}">{{ article.name }}</h3></a>
+                </div>
+                {% ifnotequal article.seller.user.id request.user.id %}
+                    <div class="row">
+                        {% if request.user.is_authenticated %}
+                            <a href="#" onclick="load_trade_modal('{{article.id}}')" data-target="#trade_modal" class="btn_exchange" data-toggle="modal">Trade it</a>
+                        {% else %}
+                            <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn_exchange">Trade it</a>
+                        {% endif %}
+                        <a href="#" onclick="load_buy_modal('{{article.id}}')" data-target="#buy_modal" class="btn_buy" data-toggle="modal">Buy it</a>
+                    </div>
+                {% endifnotequal %}
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+<section class="categories">
+    <h1 class="titular-seccion"><span>Categories</span></h1>
+    <div class="grid col-4">
+        {% regroup categories by subcategories as categories_list %}
+        {% for cat in categories_list %}
+            <nav>
+                <h2 class="category-tittle">{{ cat.grouper.name_category }}</h2>
+                <ul>
+                    {% for subcat in cat.list %}
+                        <li>
+                            <form method="get" action="/search/.">
+                                <input id="id_q" name="q" type="hidden" value="{{ subcat.name_category }}">
+                                <button type="submit" class="search-link">{{ subcat.name_category }}</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>    
+        {% endfor %}
+    </div>
+</section>
+{% include 'modal_buy.jade' %}
+{% include 'modal_trade.jade' %}
+{% endblock %}
+
+{% block js %}
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script language="javascript">
+        $(document).ready(function(e) {
+            try {
+                $("body .top select, .orden select").msDropDown();
+            } catch(e) {
+                alert(e.message);
+            }
+            var handler = StripeCheckout.configure({
+                key:'pk_test_BoW8F6Q7irw3c9bfR2D4HZv6',
+                //key:'pk_live_MWWPMVtTJ3tiOxPLJgjrxemB',
+                image:'{% static "images/logo_stripe.png" %}',
+                token:function(token, args) {
+                    console.log(token);
+                    $('#buy_product_token').val(token.id);
+                    $('#buy_modal #buy_modal_form').submit();
+                    $('#buy_modal').modal('toggle');
+                }
+            });
+            $('#stripe_button').click(function(e) {
+                e.preventDefault();
+                handler.open({
+                    name:'Equallo',
+                    description:'1 contact ($1.99)',
+                    amount:199,
+                    panelLabel:'Pay',
+                    billingAddress:true,
+                    shippingAddress:true,
+                    email:'{{ request.user.email }}',
+                });
+            });
+            $('#sort_options').change(function() {
+                sortBy($(this).val());
+            });
+            $('.most-traded-cat li a').click(function() {
+                $(this).find('form').submit();
+            });
+        });
+        function load_buy_modal(product_id) {
+            $('#buy_product_id').val(product_id);
+            var product_name = $('#prodname-'+product_id).text();
+            $('#buy_product_name').text(product_name);
+            var product_image = $('#prodimg-'+product_id).attr('src');
+            $('#buy_product_image').attr('src',product_image);
+            var product_description = $('#proddesc-'+product_id).text();
+            $('#buy_product_description').text(product_description);
+            var product_location = $('#prodloc-'+product_id).val();
+            $('#buy_product_user').html('<div><img src="{% static "images/location_user_icon.png" %}"><span class="user-location">'+product_location+'</span></div>');
+        }
+    </script>
+    {% if request.user.is_authenticated %}
+    <script>
+        $(document).ready(function() {
+            $('#trade_modal_form').submit(function(e) {
+                var checked_articles = [];
+                $('#user_items_list input[type="checkbox"]:checked').each(function() {
+                    checked_articles.push($(this).val());
+                });
+                $('#user_items_trade').val(checked_articles);
+            });
+        });
+        function load_trade_modal(product_id) {
+            var product_name = $('#prodname-'+product_id).text();
+            $('#trade_product_name').text(product_name);
+            var product_price = $('#prodprice-'+product_id).val();
+            $('#trade_product_price').text('$'+product_price);
+            var product_image = $('#prodimg-'+product_id).attr('src');
+            $('#trade_product_image').attr('src',product_image.replace('thumbnail', 'small'));
+            var product_location = $('#prodloc-'+product_id).val();
+            $('#trade_product_user').html('<div><img src="{% static "images/location_user_icon.png" %}"><span class="user-location">'+product_location+'</span></div>');
+            $('#item_id').val(product_id);
+        }
+    </script>
+    {% endif %}
+{% endblock %}

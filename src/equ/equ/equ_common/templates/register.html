@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href='{% static "css/account.css" %}'/>
+{% endblock extra_head %}
+
+{% block content %}
+<section class="presenta">
+    <div class="arriba">
+        <a id="logo_barra" href="/"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        <div class="texto-header">
+            <h1>Creating your Account</h1>
+            <p>We're glad you are here just a step away from being part of this awesome community where you can choose from a vast list of catalogues of products you might be interested in. Once registered you can start uploading, trading or selling on Equallo!</p>
+        </div>
+    </div>
+</section>
+<section class="registro">
+    {% if show %}
+    <form class="creating-account" method="POST" action"{% url 'register'%}" enctype="multipart/form-data">
+        <section class="con-borde contact-information">
+            <h1 class="titular-seccion"><span>Contact Information</span></h1>
+            {% csrf_token %}
+            <div class="left">
+                {% for field in user %}
+                <div class="line {% if field.errors %}error{% endif %}">
+                    <label>
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    <span class="help-line">{{ field.errors }}</span>
+                </div>
+                {% endfor %}
+                {% for field2 in additional %}
+                <div class="line {% if field2.errors %}error{% endif %}">
+                    <label>
+                        {{ field2.label }}
+                    </label>
+                    {{ field2 }}
+                    <span class="help-line">{{ field.errors }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        <div class="btn-space">
+            <ul class="form-nav">
+                <li><input type="submit" class="btn confirm" value="Create Account !"></li>
+            </ul>
+        </div>
+    </form>
+    {% endif %}
+</section>
+{{ message }}
+{% endblock %}

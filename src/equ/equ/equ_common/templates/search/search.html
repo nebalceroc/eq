@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load equ_extras %}
+
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href='{% static "css/especificos_lista_productos.css" %}'/>
+<link rel="stylesheet" type="text/css" href='{% static "css/especificos_detalle_productos.css" %}'/>
+{% endblock extra_head %}
+ 
+
+{% block content %}
+<section class="presenta">
+    <div class="arriba row">
+        <div class="col-md-3">
+            <a id="logo_barra" href="/"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        </div>
+        <div class="col-md-9">
+            <form method="GET" action="/search/.">
+                <input id="id_q" name="q" type="text" placeholder="What are you looking for?">
+                <button type="submit">Find it!</button>
+            </form>
+        </div>
+    </div>
+    <!--<section class="related row">
+        <div class="col-md-12 pull-right">
+            <span>Related searches for <span>typewritter</span> 8:</span>
+            <ul>
+                <li><a href="#">electric typewriter</a></li>
+                <li><a href="#">vintage typewriter</a></li>
+                <li><a href="#">remington typewriter</a></li>
+                <li><a href="#">manual typewriter</a></li>
+            </ul>
+        </div>
+    </section>-->
+</section>
+<section class="main">
+    {% if message %}
+        <div class="alert alert-info"><i class="fa fa-thumbs-up"></i> {{ message }}</div>
+    {% elif error %}
+        <div class="alert alert-danger"><i class="fa fa-times-circle"></i> {{ error }}</div>
+    {% endif %}
+    <aside class="categories">
+        <h1 class="titular-seccion"><span>Categories</span></h1>
+        <div class="grid col-4">
+            {% regroup categories by subcategories as categories_list %}
+            {% for cat in categories_list %}
+                <nav>
+                    <h2 class="category-tittle">{{ cat.grouper.name_category }}</h2>
+                    <ul>
+                        {% for subcat in cat.list %}
+                            <li>
+                                <form method="get" action="/search/.">
+                                    <input id="id_q" name="q" type="hidden" value="{{ subcat.name_category }}">
+                                    <button type="submit" class="search-link">{{ subcat.name_category }}</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>    
+            {% endfor %}
+        </div>
+    </aside>
+    <section class="resultados">
+        <div class="filtros">
+            <span class="result-num"><span>{{ articles|length }}</span> Active Listings</span>
+            <div class="orden">
+                <span>Sort By:</span>
+                <select style="width:140px;" id="sort_options">
+                    <option value="1">Recently Added</option>
+                    <option value="2">Price: Lowest First</option>
+                    <option value="3">Price: Highest First</option>
+                </select>
+            </div>
+        </div>
+        <section class="product-list">
+            <div class="col-md-12" id="results-list">
+                {% ifequal articles|length 0 %}
+                    <p>No results found.</p>
+                {% else %}
+                    {% for result in articles %}
+                        <div class="row">
+                            <div class="product-image-thumb col-md-4">
+                                <a href="{% url 'product_detail' result.id %}">
+                                    <img id="prodimg-{{ result.id }}" src="{{ MEDIA_URL }}{{ result.imagearticle_set.all.0.image.small.url }}">
+                                </a>
+                            </div>
+                            <div class="product-description-thumb col-md-5">
+                                <h2><a href="/product_detail/{{ result.id }}" id="prodname-{{ result.id }}">{{ result.name }}</a></h2>
+                                <p id="proddesc-{{ result.id }}">{{ result.description }}</p>
+                                <input id="proddate-{{result.id}}" type="hidden" class="item-date" value="{{ result.date }}" >
+                                <input id="prodloc-{{ result.id }}" type="hidden" value="{{result.seller.city }}, {{ result.seller.state }}">
+                                <input id="produser-{{ result.id }}" type="hidden" value="{{result.seller.user.first_name }}, {{ result.seller.user.last_name }}">
+                            </div>
+                            <div class="product-price col-md-3">
+                                <span>Price</span>
+                                <span class="price">$<span class="item-price-value" id="prodprice-{{ result.id }}">{{ result.price }}</span></span>
+                                {% if result.seller.user.id != request.user.id %}
+                                    {% if request.user.is_authenticated %}
+                                        <a href="#" onclick="load_trade_modal('{{result.id}}')" data-target="#trade_modal" class="btn_exchange" data-toggle="modal">Trade it</a>
+                                    {% else %}
+                                        <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn_exchange">Trade it</a>
+                                    {% endif %}
+                                    <a href="#" onclick="load_buy_modal('{{result.id}}')" data-target="#buy_modal" class="btn_buy" data-toggle="modal">Buy it</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endifequal %}
+            </div>
+            <div class="row text-center">
+                <ul class="pagination">
+                    <li class="disabled">
+                        <a>
+                            <i class="fa fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="disabled">
+                            <a>
+                                <i class="fa fa-angle-double-right"></i>
+                            </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </section>
+</section>
+{% include 'modal_buy.jade' %}
+{% include 'modal_trade.jade' %}
+{% endblock %}
+{% block js %}
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script language="javascript">
+    $(document).ready(function(e) {
+        try {
+            $("body .top select, .orden select").msDropDown();
+        } catch(e) {
+            alert(e.message);
+        }
+        var handler = StripeCheckout.configure({
+            key:'pk_test_BoW8F6Q7irw3c9bfR2D4HZv6',
+            //key:'pk_live_MWWPMVtTJ3tiOxPLJgjrxemB',
+            image:'{% static "images/logo_stripe.png" %}',
+            token:function(token, args) {
+                $('#buy_product_token').val(token.id);
+                $('#buy_modal #buy_modal_form').submit();
+                $('#buy_modal').modal('toggle');
+            }
+        });
+        $('#stripe_button').click(function(e) {
+            e.preventDefault();
+            handler.open({
+                name:'Equallo',
+                description:'1 contact ($1.99)',
+                amount:199,
+                panelLabel:'Pay',
+                billingAddress:true,
+                shippingAddress:true,
+                email:'{{ request.user.email }}',
+            });
+        });
+        $('#sort_options').change(function() {
+            sortBy($(this).val());
+        });
+    });
+    function load_buy_modal(product_id) {
+        $('#buy_product_id').val(product_id);
+        var product_name = $('#prodname-'+product_id).text();
+        $('#buy_product_name').text(product_name);
+        var product_image = $('#prodimg-'+product_id).attr('src');
+        $('#buy_product_image').attr('src',product_image.replace('thumbnail', 'large'));
+        var product_description = $('#proddesc-'+product_id).text();
+        $('#buy_product_description').text(product_description);
+        var product_location = $('#prodloc-'+product_id).val();
+        $('#buy_product_user').html('<div><img src="{% static "images/location_user_icon.png" %}"><span class="user-location">'+product_location+'</span></div>');
+    }
+</script>
+{% if request.user.is_authenticated %}
+<script>
+    $(document).ready(function() {
+        $('#trade_modal_form').submit(function(e) {
+            var checked_articles = [];
+            $('#user_items_list input[type="checkbox"]:checked').each(function() {
+                checked_articles.push($(this).val());
+            });
+            $('#user_items_trade').val(checked_articles);
+        });
+    });
+    function load_trade_modal(product_id) {
+        var product_name = $('#prodname-'+product_id).text();
+        $('#trade_product_name').text(product_name);
+        var product_price = $('#prodprice-'+product_id).text();
+        $('#trade_product_price').text('$'+product_price);
+        var product_image = $('#prodimg-'+product_id).attr('src');
+        $('#trade_product_image').attr('src',product_image.replace('thumbnail', 'large'));
+        var product_location = $('#prodloc-'+product_id).val();
+        $('#trade_product_user').html('<div><img src="{% static "images/location_user_icon.png" %}"><span class="user-location">'+product_location+'</span></div>');
+        $('#item_id').val(product_id);
+    }
+</script>
+{% endif %}
+<script type="text/javascript" src="{% static 'js/search.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/pagination.js' %}"></script>
+{% endblock %}

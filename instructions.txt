@@ -1,0 +1,12 @@
+1. Mount virtualenv
+2. Install requirements
+3. pip uninstall PIL
+4. apt-get install libjpeg8 libpng12-0 libfreetype6 zlib1g
+5. ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib
+   ln -s /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib
+   ln -s /usr/lib/x86_64-linux-gnu/libz.so /usr/lib
+6. pip install PIL
+7. Run syncdb
+8. Run check_permissions
+9. Run runserver
+10. Run rebuild_index

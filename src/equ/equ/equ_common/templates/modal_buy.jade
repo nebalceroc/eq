@@ -1,0 +1,37 @@
+- load i18n
+- load staticfiles
+
+.modal.fade#buy_modal(tabindex="-1", role="dialog", aria-labelledby="buy_modal_label", aria-hidden="true")
+  .modal-dialog
+    .modal-content
+      .modal-header
+        .close(data-dismiss="modal")
+      .modal-body.con-borde
+        form#buy_modal_form(role="form", action="{% url 'buy_article_info' %}", method="post")
+          - csrf_token
+          h3.titular-seccion#buy_modal_label
+            span {% trans 'Confirm purchase' %}
+          .row.modal-body-content
+            .col-md-6.text-center
+              .prod-image-principal
+                img#buy_product_image
+              img.credit-cards(src="{% static 'images/credit-cards.png' %}")
+            .col-md-6
+              .col-md-12.text-center
+                h4.product-detail-tittle.text-left#buy_product_name
+                p#buy_product_description.prod-desc
+              p.legal-buy You are about to buy the contact information of this member. Please remember that you're buying the contact information NOT the product!
+              - if request.user.is_authenticated
+                .col-md-12
+                  #buy_product_user.contact-info
+          .row.text-center.transaction-cost
+            p.cost-tran The cost of this transaction is
+            p.price-tran $1.99
+            input(type="hidden", name="stripe_token", id="buy_product_token")
+            input(type="hidden", name="article_id", id="buy_product_id")
+          .row.text-center
+            - if request.user.is_authenticated
+              button#stripe_button.btn.confirm(type="button") {% trans 'Confirm' %}
+            - else
+              a.btn.confirm(href="{% url 'login' %}?next={{ request.get_full_path }}") {% trans 'Confirm' %}
+            button.btn.cancel(type="button", data-dismiss="modal") {% trans 'Cancel' %}

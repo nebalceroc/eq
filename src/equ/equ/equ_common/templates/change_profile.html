@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href='{% static "css/account.css" %}'/>
+	<section class="presenta">
+    	<div class="arriba">
+    		<a id="logo_barra" href="#"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        	<div class="texto-header">
+            	<h1>Editing your Account</h1>
+                <p>Please make sure you are providing the correct information. Remember that it will be provided to the counter part when both parties had paid the trading fee. This procedure will be the same for all the transactions among the follow members of this community. Now lets Equallo!</p>
+            </div>
+         </div>
+    </section>
+    <section class="registro">
+    <form id="user_profile_form" class="creating-account" method="POST" action="{% url 'profile_change' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% if msg %}
+        <div class="alert alert-danger error-form-register">{{ msg }}</div>
+    {% endif %}
+      <section class="con-borde contact-information">
+      	<h1 class="titular-seccion"><span>General Information</span></h1>
+          <section class="contact-info-wrap">
+            <div class="left">
+              <div class="line account-first-name">
+                <label>{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+              </div>
+              <div class="line account-last-name">
+                <label>{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+              </div>
+              {% if not register %}
+              <div class="line account-last-name">
+                <label>{{ form.password.label }}</label>
+                {{ form.password }}
+              </div>
+              <div class="line account-last-name">
+                <label>{{ form.confirm_password.label }}</label>
+                {{ form.confirm_password }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="right pic-profile" align="center">
+              {% if image %}
+                <img id="user-pic" src='{{ MEDIA_URL }}{{ image.large.url }}'>
+              {% else %}
+                <img id="user-pic" src='{% static "images/user-pic.jpg" %}'>
+                {% endif %}
+              <a class="add-photo button" href="#" onclick="$('#id_image').click();return false;">Add Photo</a>
+              <div style="display:none;">{{form.image}}</div>
+            </div>
+          </section>
+              <!--<div class="line contact-adress">
+                     <label>{{form.address.label}}</label>
+                     {{form.address}}
+                </div>-->
+      </section>
+      <section class="con-borde contact-information">
+            <h1 class="titular-seccion"><span>Contact Information</span></h1>
+            <!--<div class="line contact-telephone">
+                    <label>{{ form.phone.label }}</label>
+                    {{ form.phone }}
+                  </div>-->
+              <div class="line contact-mobile">
+                    <label>{{ form.mobile.label }}</label>
+                    {{ form.mobile }}
+                  </div>
+                <div class="line contact-email">
+                    <label>{{ form.email.label }}</label>
+                    {{ form.email }}
+                  </div>
+            <div class="line contact-mobile">
+                    <label>{{form.city.label}}</label>
+                    {{form.city}}
+                <!--<div class="zip-code campo">
+                    <label>{{form.zipcode.label}}</label>
+                    {{form.zipcode}}
+                </div>-->
+            </div>
+        </section>
+      <section class="con-borde interests">
+                <h1 class="titular-seccion"><span>Select your Interests</span></h1>
+                <div class="form-fields">
+                        <div class="grid col-4" id="user_categories">
+                            {% regroup categories by subcategories as categories_list %}
+                            {% for cat in categories_list %}
+                                <nav>
+                                    <h2 class="category-tittle">{{ cat.grouper }}</h2>
+                                    <ul>
+                                        {% for subcat in cat.list %}
+                                            {% if subcat in user_categories %}
+                                                <li><input type="checkbox" id="cat-{{ subcat.id }}" value="{{ subcat.id }}" checked><label for="cat-{{ subcat.id }}">{{ subcat.name_category }}</label></li>
+                                            {% else %}
+                                                <li><input type="checkbox" id="cat-{{ subcat.id }}" value="{{ subcat.id }}"><label for="cat-{{ subcat.id }}">{{ subcat.name_category }}</label></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </nav>    
+                            {% endfor %}
+                        </div>
+                        <input style="display:none;" id="user_cats" name="user_categories">
+                    </div>
+            </section>
+            {% if not terms %}
+            <div class="terms-conditions">
+                  {{ form.terms }}
+                  <span>I have read all the <a href="#">Terms and Conditions</a></span>
+              </div>
+            {% endif %}
+            <div class="btn-space">
+                <ul class="form-nav">
+                    <li>
+                        {% if register %}
+                        <input type="hidden" name="register" value="from_register">
+                        <button type="submit" class="btn confirm">Create Account!</button>
+                        {% else %}
+                        <button type="submit" class="btn confirm">Save</button>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </form>
+    </section> 
+  {% endblock %}
+
+{% block js %}
+  <script src="{% static 'js/profile.js' %}"></script>
+{% endblock %}

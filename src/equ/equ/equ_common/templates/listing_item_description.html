@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+{% load equ_extras %}
+<link rel="stylesheet" type="text/css" href='{% static "css/especificos_listing.css" %}' />
+{% endblock extra_head %}
+
+
+{% block content %}
+<section class="presenta">
+    <div class="arriba">
+        <a id="logo_barra" href="#"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        <div class="texto-header">
+            <h1>Listing your Items</h1>
+            <p>Create an accurate title, put a price and description. Try to summarize all the relevant content from your items. Remember that the more descriptive you are the more chances you have to trade or sell your products. Upload up to 5 photos for each item and get all the fan out of Equallo. Remember that the description and photos represent the state of your products. Now Lets Equallo !</p>
+        </div>
+    </div>
+</section>
+<form id="create_item_form" method="POST" action={% if modify %}"{% url 'modify_article' article_id %}"{% else %}"{% url 'article_up' %}"{% endif %} enctype="multipart/form-data" >
+    {% if message %}
+        <div class="alert alert-danger error-form-register">{{ message }}</div>
+    {% endif %}
+    <div class ="formulario">
+        <div class="form-tittle primero">
+            <span class="number-tittle">1</span>
+            <h1>Article Details:</h1>
+        </div>
+        {% csrf_token %}
+        <div class="form-fields">
+            <div class="contact-info">
+                
+                <div class="line-1 article-tittle">
+                    <label>{{ article_form.name.label }}:*</label>
+                    {{ article_form.name }}
+                </div>
+                <div class="line-1 article-price">
+                    <label>{{ article_form.price.label }}:*</label>
+                    <span class="dolar-sign">$</span>{{ article_form.price }}
+                    <span class="dolar-sign">USD</span>
+                </div>
+                <div class="line-2 article-description">
+                    <label>{{ article_form.description.label }}:*</label>
+                    {{ article_form.description }}
+                </div>
+            </div>
+            
+        </div>
+        <div class="form-tittle">
+            <span class="number-tittle">2</span>
+            <h1>Upload your Images:</h1>
+        </div>
+        <div class="form-fields">
+            <fieldset id="uploader-pic-group">
+                <div class="col-md-2">
+                    <img src="{% static 'images/images-upload-icon.png' %}" width="130px" height="130px"/>
+                </div>
+                <div class="col-md-10">
+                    <div id="uploader-images" class="uploader-images">
+                        {% if article_images %}
+                            {% for img in article_images %}
+                                <div class="imageup">
+                                    <input class="loaders" type="file" accept="image/*" name="imgup-{{ forloop.counter }}" style="display:none;">
+                                    <img src="{{ MEDIA_URL }}{{ img.image.thumbnail.url }}" width="100px" height="100px" id="imgup-{{ forloop.counter }}" />
+                                    <div class="close"></div>
+                                </div>
+                            {% endfor %}
+                            {% if article_images|length < 5 %}
+                                <div class="imageup">
+                                    <input class="loaders" type="file" accept="image/*" name="imgup-0" style="display:none;">
+                                    <i class="fa fa-plus-circle fa-5x add-photo"></i>
+                                    <div class="add-photo">Add photo</div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="imageup">
+                                <input class="loaders" type="file" accept="image/*" name="imgup-0" style="display:none;">
+                                <i class="fa fa-plus-circle fa-5x add-photo"></i>
+                                <div class="add-photo">Add photo</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </fieldset>                          
+        </div>
+        <div class="form-tittle">
+            <span class="number-tittle">3</span>
+            <h1>Categories:</h1>
+        </div>
+        <div class="form-fields">
+          <div class="grid cats col-4" id="item_categories">
+            {% regroup categories by subcategories as categories_list %}
+            {% for cat in categories_list %}
+                <nav>
+                    <h2 class="category-tittle">{{ cat.grouper.name_category }}</h2>
+                    <ul>
+                        {% for subcat in cat.list %}
+                            <li>
+                                {% if subcat in article_categories %}
+                                    <input type="checkbox" id="{{ subcat.id }}"checked>
+                                {% else %}
+                                    <input type="checkbox" id="{{ subcat.id }}">
+                                {% endif %}
+                                <label for="{{ subcat.id }}">{{ subcat.name_category }}</label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </nav>    
+            {% endfor %}
+          </div>
+      </div>
+    </div>
+    <input style="display:none;" id="item_cats" name="item_categories">
+    <input style="display:none;" id="item_imgs" name="item_images">
+    <div class="btn-space">
+        <ul class="form-nav">
+            <!-- <li><a href="#" class="btn cancel">Previus</a></li> -->
+            <li><button type="submit" class="btn confirm">Save</button></li>
+        </ul>
+    </div>
+</form>
+{% endblock %}
+{% block js %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#create_item_form').submit(function(e) {
+            var checked_cats = [];
+            $('#item_categories input[type="checkbox"]:checked').each(function() {
+                checked_cats.push(this.id);
+            })
+            if(checked_cats.length > 0) {
+                $('#item_cats').val(checked_cats);
+                var uploaded_images = [];
+                $('#uploader-images img').each(function() {
+                    uploaded_images.push({ url:$(this).attr('src'), name:$(this).attr('id') });
+                });
+                $('#item_imgs').val(JSON.stringify(uploaded_images));
+            } else {
+                $(this).find('.btn-space').before('<div style="margin:auto;width:520px;"><div class="alert alert-danger"><strong>Error!</strong> Please select at least one interest.</div></div>');
+                e.preventDefault();
+            }
+        });
+        $('#uploader-images').delegate('i', 'click', function(e) {
+            $(this).siblings('input').click();
+        });
+        $('#uploader-images').delegate('.close', 'click', function() {
+            var imgups = $(this).parent().siblings().length;
+            var add = $(this).parent().siblings().find('i.fa.fa-plus-circle');
+            $(this).parent().remove();
+            if(imgups < 5 && add.length == 0) {
+                $('<div class="imageup"><input class="loaders" type="file" accept="image/*" name="imgup-0" style="display:none;">'+
+                    '<i class="fa fa-plus-circle fa-5x add-photo"></i><div class="add-photo">Add photo</div></div>').appendTo($('#uploader-images'));
+            }
+        });
+        $('#uploader-images').delegate('.loaders', 'change', function() {
+            var file = window.URL.createObjectURL(this.files[0]);
+            $(this).hide();
+            var index = parseInt($(this).parent().index());
+            var previous = $($(this).parent()).find('input');
+            $(this).parent().html($(previous));
+            $($(this).parent()).append($('<img src="'+file+'" width="100px" height="100px" id="'+$(this).attr('name')+'"/><div class="close"></div>'));
+            if(index < 4) {
+                var index = index+1;
+                $('<div class="imageup"><input class="loaders" type="file" accept="image/*" name="imgup-'+index+'" style="display:none;"><i class="fa fa-plus-circle fa-5x add-photo"></i><div class="add-photo">Add photo</div></div>').appendTo($('#uploader-images'));
+            }
+        });
+    });
+</script>
+{% endblock %}

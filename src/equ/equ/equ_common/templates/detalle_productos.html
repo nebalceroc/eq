@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href='{% static "css/especificos_detalle_productos.css" %}'/>
+{% endblock extra_head %}
+
+
+{% block content %}
+<section class="presenta">
+    <div class="arriba row">
+        <div class="col-md-3">
+            <a id="logo_barra" href="index.html"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        </div>
+        <div class="col-md-9">
+            <form method="GET" action="/search/.">
+                <input id="id_q" name="q" type="text" placeholder="What are you looking for?">
+                <button type="submit">Find it!</button>
+            </form>
+        </div>
+    </div>
+    <section class="main row">
+        <div class="col-md-12">
+            <div class="bar">
+                <a href="javascript:history.back(1)" class="back-button">Back to the Results</a>
+                <div class="breadcrumb">
+                    <ul>
+                        <li><span id="inicio"></span></li>
+                        <li><a href="{% url 'home'%}">Home</a></li>
+                    </ul>
+                </div>
+                <!-- <div class="buttons">
+                    <a href="#">Upload your Items</a>
+                    <a href="#">Sign Up Now !</a>
+                </div> -->
+            </div>
+        </div>
+    </section>
+  	<section class="product row"> 
+        {% if message %}
+            <div class="col-md-12">
+                <div class="alert alert-info"><i class="fa fa-thumbs-up"></i> {{ message }}</div>
+            </div>
+        {% elif error %}
+            <div class="col-md-12">
+                <div class="alert alert-danger"><i class="fa fa-times-circle"></i> {{ error }}</div>
+            </div>
+        {% endif %}
+        <div class="col-md-12">
+            <div class="product-gallery">
+                <div class="product-image-principal" width="470" height="470">
+                    <div id="img-principal">
+                        <img src="{{ MEDIA_URL }}{{ article.imagearticle_set.all.0.image.large.url }}" id="prodimg">
+                    </div>
+                </div>
+                <div class="product-images-thumb">
+                    {% for img in article.imagearticle_set.all %}
+                        <li>
+                            <a class="img_thumbnail">
+                                <img src='{{ MEDIA_URL }}{{ img.image.thumbnail.url }}' id='{{ img.id }}'/>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="product-detail">
+                <link rel="stylesheet" type="text/css" href='{% static "css/especificos_detalle_productos.css" %}'/>
+                <h1 class="product-detail-tittle" id="prodname">{{ article.name }}</h1>
+                <div class="contact-info">
+                    <ul>
+                        <li>
+                            <img src='{% static "images/location_user_icon.png" %}'>
+                            <span class="user-location" id="prodloc">{{ article.seller.city }}</span>
+                        </li>
+                        <!--<li>
+                            <img src="{% static 'images/user_name_icon.png' %}">
+                            <span class="user-name" id="produser">{{ article.seller.user.first_name }} {{ article.seller.user.last_name }}</span>
+                        </li>-->
+                    </ul>
+                </div>
+                <p class="product-description" id="proddesc">{{ article.description }}</p>
+                <div class="product-price-info">
+                    <div class="price-box">
+                        <span class="price-label">Price:</span>
+                        <span id="prodprice" class="price-value">${{ article.price }}</span>
+                    </div>
+                    <div class="action-btns">
+                        {% ifnotequal article.seller.user.id request.user.id %}
+                            {% if request.user.is_authenticated %}
+                                <a href="javascript:load_trade_modal('{{ article.id }}')" class="btn_exchange">Trade it</a>
+                            {% else %}
+                                <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn_exchange">Trade it</a>
+                            {% endif %}
+                            <a href="#" onclick="load_buy_modal('{{result.id}}')" data-target="#buy_modal" class="btn_buy" data-toggle="modal">Buy it</a>
+                        {% endifnotequal %}
+                    </div>
+                </div>
+                <div class="product-social-share">
+                    <span>Coming soon!</span>
+                    <ul>
+                        <li><a href="#" class="btn-facebook">Share on Facebook</a></li>
+                        <li><a href="#" class="btn-twitter">Share on Twitter</a></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        {% if recent_articles %} 
+            <section class="recently">
+                <h1 class="titular-seccion"><span>Recently Added Items</span></h1>
+                <div class="grid recent col-4">
+                    {% for article in recent_articles %}
+                        <article>
+                            <div class="row">
+                                <a href="{% url 'product_detail' article.id %}">
+                                    <div class="over"><span class="lupa"></span></div>
+                                    <div class="product-image-container">
+                                        <img id="prodimg-{{ article.id }}" class="product-image" src="{{ MEDIA_URL }}{{ article.imagearticle_set.all.0.image.large.url }}">
+                                    </div>
+                                    <input id="prodloc-{{ article.id }}" type="hidden" value="{{article.seller.city }}">
+                                    <input id="prodprice-{{ article.id }}" type="hidden" value="{{ article.price }}">
+                                </a>
+                            </div>
+                            <div class="row">
+                                <a href="{% url 'product_detail' article.id %}" class="product-tittle"><h3 id="prodname-{{ article.id }}">{{ article.name }}</h3></a>
+                            </div>
+                            {% ifnotequal article.seller.user.id request.user.id %}
+                                <div class="row">
+                                    {% if request.user.is_authenticated %}
+                                        <a href="#" onclick="load_trade_modal('{{article.id}}')" data-target="#trade_modal" class="btn_exchange" data-toggle="modal">Trade it</a>
+                                    {% else %}
+                                        <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn_exchange">Trade it</a>
+                                    {% endif %}
+                                    <a href="#" onclick="load_buy_modal('{{article.id}}')" data-target="#buy_modal" class="btn_buy" data-toggle="modal">Buy it</a>
+                                </div>
+                            {% endifnotequal %}
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+    </div>
+    {% include 'modal_trade.jade' %}
+    {% include 'modal_buy.jade' %}
+</section>
+{% endblock %}
+{% block js %}
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script language="javascript">
+        $(document).ready(function(e) {
+            try {
+                $("body .top select, .orden select").msDropDown();
+            } catch(e) {
+                alert(e.message);
+            }
+            $('.img_thumbnail').click(function() {
+                var img = $(this).children()[0];
+                $('#prodimg').attr('src', $(img).attr('src').replace('thumbnail','large'));
+            });
+            var handler = StripeCheckout.configure({
+                key:'pk_test_BoW8F6Q7irw3c9bfR2D4HZv6',
+                //key:'pk_live_MWWPMVtTJ3tiOxPLJgjrxemB',
+                image:'{% static "images/logo_stripe.png" %}',
+                token:function(token, args) {
+                    console.log(token);
+                    $('#buy_product_token').val(token.id);
+                    $('#buy_modal #buy_modal_form').submit();
+                    $('#buy_modal').modal('toggle');
+                }
+            });
+            $('#stripe_button').click(function(e) {
+                e.preventDefault();
+                handler.open({
+                    name:'Equallo',
+                    description:'1 contact ($1.99)',
+                    amount:199,
+                    panelLabel:'Pay',
+                    billingAddress:true,
+                    shippingAddress:true,
+                    email:'{{ request.user.email }}',
+                });
+            });
+        });
+        function load_buy_modal(product_id) {
+            $('#buy_product_id').val(product_id);
+            var product_name = $('#prodname').text();
+            $('#buy_product_name').text(product_name);
+            var product_image = $('#prodimg').attr('src');
+            $('#buy_product_image').attr('src',product_image.replace('thumbnail', 'large'));
+            var product_description = $('#proddesc').text();
+            $('#buy_product_description').text(product_description);
+            var product_location = $('#prodloc').text();
+            $('#buy_product_user').html('<div><img src="{% static "images/location_user_icon.png" %}"><span class="user-location">'+product_location+'</span></div>');
+            $('#buy_modal').modal('toggle');
+        }
+    </script>
+    {% if request.user.is_authenticated %}
+        <script>
+            $(document).ready(function() {
+                $('#trade_modal_form').submit(function(e) {
+                    var checked_articles = [];
+                    $('#user_items_list input[type="checkbox"]:checked').each(function() {
+                        checked_articles.push($(this).val());
+                    });
+                    $('#user_items_trade').val(checked_articles);
+                });
+            });
+            function load_trade_modal(article_id) {
+                var product_name = $('#prodname').text();
+                $('#trade_product_name').text(product_name);
+                var product_price = $('#prodprice').text();
+                $('#trade_product_price').text(product_price);
+                var product_image = $('#prodimg').attr('src');
+                $('#trade_product_image').attr('src',product_image.replace('thumbnail', 'large'));
+                $('#item_id').val(article_id);
+                var product_location = $('#prodloc').text();
+                $('#trade_product_user').html('<div><img src="{% static "images/location_user_icon.png" %}"><span class="user-location">'+product_location+'</span></div>');
+                $('#trade_modal').modal('toggle');
+            }
+        </script>
+    {% endif %}
+{% endblock %}

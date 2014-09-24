@@ -1,0 +1,451 @@
+- extends 'base.html'
+- load i18n
+- load staticfiles
+
+- block extra_head
+    link(rel="stylesheet", type="text/css", href="{% static 'css/especificos_your_trades.css' %}")
+
+- block content
+    .row.arriba
+        .col-md-4
+            a#logo_barra(href="{% url 'home' %}")
+                img#circles_ani(src="/static/images/logo_circles.png")
+                img#equallo(src="/static/images/logo_sin_circle.png")
+        .col-md-8
+            .texto-header
+                h1 Your Trades
+                p Equallo keeps a record of your trades, accepted and declined. Please review your history on a frequent basis.
+    .panel.panel-default
+        .panel-heading
+            .row
+                .col-md-6
+                    h3.panel-title All Trades
+                .col-md-6
+                    ul#pills.nav.nav-pills.pull-right
+                        li.active
+                            a(href="#all_trades", data-toggle="pill") All
+                        li
+                            a(href="#requests", data-toggle="pill")
+                                | Requests
+                                span.badge {{pending}}
+                        li
+                            a(href="#accepted", data-toggle="pill")
+                                | Accepted
+                                span.badge {{accepted}}
+                        li
+                            a(href="#declined", data-toggle="pill")
+                                | Declined
+                                span.badge {{declined}}
+        .panel-body
+            .tab-content
+                #all_trades.tab-pane.active
+                    .row.items-heading
+                        .col-md-6
+                            h4.blue Someone's items
+                        .col-md-6
+                            h4.pink Your items
+                    - for trade in trades
+                        .row    
+                            .col-md-12
+                                hr
+                        .row.items-content
+                            .col-md-12(align="right")
+                                a.small-link(href="{% url 'delete_trade' trade.id %}") {% trans 'Delete trade' %}
+                            .col-md-6.left
+                                - if trade.receiver_article.seller.user.id == request.user.id
+                                    - for offer in trade.tradeoffererarticle_set.all
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9    
+                                                h2.list_items-tittle {{ offer.article.name }}
+                                                p.price ${{ offer.article.price }}
+                                                p.descrip {{ offer.article.description }}
+                                                a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                - else
+                                    .row
+                                        .col-md-3
+                                            img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                        .col-md-9
+                                            h2.list_items-tittle {{ trade.receiver_article.name }}
+                                            p.price ${{ trade.receiver_article.price }}
+                                            p.descrip {{ trade.receiver_article.description }}
+                                            a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                            .col-md-6.right
+                                - if trade.receiver_article.seller.user.id != request.user.id
+                                    - for offer in trade.tradeoffererarticle_set.all
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9    
+                                                h2.list_items-tittle {{ offer.article.name }}
+                                                p.price ${{ offer.article.price }}
+                                                p.descrip {{ offer.article.description }}
+                                                a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                - else
+                                    .row
+                                        .col-md-3
+                                            img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                        .col-md-9
+                                            h2.list_items-tittle {{ trade.receiver_article.name }}
+                                            p.price ${{ trade.receiver_article.price }}
+                                            p.descrip {{ trade.receiver_article.description }}
+                                            a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                            - if trade.state == 'Accepted'
+                                .col-md-12.bottom-elements(align="center")
+                                    .col-md-6.col-md-offset-3.acepted-notification.bottom-elements
+                                        - if not trade.buy
+                                            p The user has accepted the trade 
+                                                i.fa.fa-check
+                                                |  
+                                                - if trade.receiver_article.seller.user.id != request.user.id
+                                                    button#stripe_button.btn.cancel(href="#") Confirm trade
+                                        - else 
+                                            p Contact information for this trade has been paid 
+                                                i.fa.fa-check
+                                        - if not trade.buy
+                                            form#trade_form(style="display:none;", method="post", action="{% url 'buy_article_info' %}")
+                                                - csrf_token
+                                                input(name="trade_id", value="{{ trade.id }}")
+                                                input(name="article_id", value="{{ trade.receiver_article.id }}")
+                                                input#trade_product_token(name="stripe_token")
+                            - elif trade.state == 'Declined'
+                                .col-md-12.bottom-elements(align="center")
+                                    .col-md-6.col-md-offset-3.declined-notification.bottom-elements
+                                        p User has declined the trade 
+                                            i.fa.fa-times
+                            - elif trade.state == 'Pending' and trade.receiver_article.seller.user.id != request.user.id
+                                .col-md-12.bottom-elements(align="center")
+                                    .col-md-6.col-md-offset-3.pendient-notification.bottom-elements
+                                        p Your request hasn't been answered yet. Please be patient.
+                            - else
+                                .col-md-12(align="center")
+                                    .col-md-6.col-md-offset-3.bottom-elements
+                                        .col-md-6.text-right
+                                            form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                - csrf_token
+                                                input(type="hidden", value="Accepted", name="response")
+                                                input(type="hidden", value="{{trade.id}}", name="trade")
+                                                button.btn.confirm(type="submit") Confirm
+                                        .col-md-6.text-left
+                                            form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                - csrf_token
+                                                input(type="hidden", value="Declined", name="response")
+                                                input(type="hidden", value="{{trade.id}}", name="trade")
+                                                button.btn.cancel(type="submit") Cancel
+                #requests.tab-pane
+                    .row.items-heading
+                        .col-md-6
+                            h4.blue Someone's items
+                        .col-md-6
+                            h4.pink Your items
+                    - for trade in trades
+                        - if trade.state == 'Pending'
+                            .row    
+                                .col-md-12
+                                    hr
+                            .row.items-content
+                                .col-md-12(align="right")
+                                    a.small-link(href="{% url 'delete_trade' trade.id %}") {% trans 'Delete trade' %}
+                                .col-md-6.left
+                                    - if trade.receiver_article.seller.user.id == request.user.id
+                                        - for offer in trade.tradeoffererarticle_set.all
+                                            .row
+                                                .col-md-3
+                                                    img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                                .col-md-9    
+                                                    h2.list_items-tittle {{ offer.article.name }}
+                                                    p.price ${{ offer.article.price }}
+                                                    p.descrip {{ offer.article.description }}
+                                                    a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                    - else
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9
+                                                h2.list_items-tittle {{ trade.receiver_article.name }}
+                                                p.price ${{ trade.receiver_article.price }}
+                                                p.descrip {{ trade.receiver_article.description }}
+                                                a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                                .col-md-6.right
+                                    - if trade.receiver_article.seller.user.id != request.user.id
+                                        - for offer in trade.tradeoffererarticle_set.all
+                                            .row
+                                                .col-md-3
+                                                    img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                                .col-md-9    
+                                                    h2.list_items-tittle {{ offer.article.name }}
+                                                    p.price ${{ offer.article.price }}
+                                                    p.descrip {{ offer.article.description }}
+                                                    a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                    - else
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9
+                                                h2.list_items-tittle {{ trade.receiver_article.name }}
+                                                p.price ${{ trade.receiver_article.price }}
+                                                p.descrip {{ trade.receiver_article.description }}
+                                                a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                                - if trade.state == 'Accepted'
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.acepted-notification.bottom-elements
+                                            - if not trade.buy
+                                                p The user has accepted the trade 
+                                                    i.fa.fa-check
+                                                    |  
+                                                    - if trade.receiver_article.seller.user.id != request.user.id
+                                                        button#stripe_button.btn.cancel(href="#") Confirm trade
+                                            - else 
+                                                p Contact information for this trade has been paid 
+                                                    i.fa.fa-check
+                                            - if not trade.buy
+                                                form#trade_form(style="display:none;", method="post", action="{% url 'buy_article_info' %}")
+                                                    - csrf_token
+                                                    input(name="trade_id", value="{{ trade.id }}")
+                                                    input(name="article_id", value="{{ trade.receiver_article.id }}")
+                                                    input#trade_product_token(name="stripe_token")
+                                - elif trade.state == 'Declined'
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.declined-notification.bottom-elements
+                                            p User has declined the trade 
+                                                i.fa.fa-times
+                                - elif trade.state == 'Pending' and trade.receiver_article.seller.user.id != request.user.id
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.pendient-notification.bottom-elements
+                                            p Your request hasn't been answered yet. Please be patient.
+                                - else
+                                    .col-md-12(align="center")
+                                        .col-md-6.col-md-offset-3.bottom-elements
+                                            .col-md-6.text-right
+                                                form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                    - csrf_token
+                                                    input(type="hidden", value="Accepted", name="response")
+                                                    input(type="hidden", value="{{trade.id}}", name="trade")
+                                                    button.btn.confirm(type="submit") Confirm
+                                            .col-md-6.text-left
+                                                form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                    - csrf_token
+                                                    input(type="hidden", value="Declined", name="response")
+                                                    input(type="hidden", value="{{trade.id}}", name="trade")
+                                                    button.btn.cancel(type="submit") Cancel
+                #accepted.tab-pane
+                    .row.items-heading
+                        .col-md-6
+                            h4.blue Someone's items
+                        .col-md-6
+                            h4.pink Your items
+                    - for trade in trades
+                        - if trade.state == 'Accepted'
+                            .row    
+                                .col-md-12
+                                    hr
+                            .row.items-content
+                                .col-md-12(align="right")
+                                    a.small-link(href="{% url 'delete_trade' trade.id %}") {% trans 'Delete trade' %}
+                                .col-md-6.left
+                                    - if trade.receiver_article.seller.user.id == request.user.id
+                                        - for offer in trade.tradeoffererarticle_set.all
+                                            .row
+                                                .col-md-3
+                                                    img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                                .col-md-9    
+                                                    h2.list_items-tittle {{ offer.article.name }}
+                                                    p.price ${{ offer.article.price }}
+                                                    p.descrip {{ offer.article.description }}
+                                                    a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                    - else
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9
+                                                h2.list_items-tittle {{ trade.receiver_article.name }}
+                                                p.price ${{ trade.receiver_article.price }}
+                                                p.descrip {{ trade.receiver_article.description }}
+                                                a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                                .col-md-6.right
+                                    - if trade.receiver_article.seller.user.id != request.user.id
+                                        - for offer in trade.tradeoffererarticle_set.all
+                                            .row
+                                                .col-md-3
+                                                    img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                                .col-md-9    
+                                                    h2.list_items-tittle {{ offer.article.name }}
+                                                    p.price ${{ offer.article.price }}
+                                                    p.descrip {{ offer.article.description }}
+                                                    a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                    - else
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9
+                                                h2.list_items-tittle {{ trade.receiver_article.name }}
+                                                p.price ${{ trade.receiver_article.price }}
+                                                p.descrip {{ trade.receiver_article.description }}
+                                                a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                                - if trade.state == 'Accepted'
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.acepted-notification.bottom-elements
+                                            - if not trade.buy
+                                                p The user has accepted the trade 
+                                                    i.fa.fa-check
+                                                    |  
+                                                    - if trade.receiver_article.seller.user.id != request.user.id
+                                                        button#stripe_button.btn.cancel(href="#") Confirm trade
+                                            - else 
+                                                p Contact information for this trade has been paid 
+                                                    i.fa.fa-check
+                                            - if not trade.buy
+                                                form#trade_form(style="display:none;", method="post", action="{% url 'buy_article_info' %}")
+                                                    - csrf_token
+                                                    input(name="trade_id", value="{{ trade.id }}")
+                                                    input(name="article_id", value="{{ trade.receiver_article.id }}")
+                                                    input#trade_product_token(name="stripe_token")
+                                - elif trade.state == 'Declined'
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.declined-notification.bottom-elements
+                                            p User has declined the trade 
+                                                i.fa.fa-times
+                                - elif trade.state == 'Pending' and trade.receiver_article.seller.user.id != request.user.id
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.pendient-notification.bottom-elements
+                                            p Your request hasn't been answered yet. Please be patient.
+                                - else
+                                    .col-md-12(align="center")
+                                        .col-md-6.col-md-offset-3.bottom-elements
+                                            .col-md-6.text-right
+                                                form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                    - csrf_token
+                                                    input(type="hidden", value="Accepted", name="response")
+                                                    input(type="hidden", value="{{trade.id}}", name="trade")
+                                                    button.btn.confirm(type="submit") Confirm
+                                            .col-md-6.text-left
+                                                form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                    - csrf_token
+                                                    input(type="hidden", value="Declined", name="response")
+                                                    input(type="hidden", value="{{trade.id}}", name="trade")
+                                                    button.btn.cancel(type="submit") Cancel
+                #declined.tab-pane
+                    .row.items-heading
+                        .col-md-6
+                            h4.blue Someone's items
+                        .col-md-6
+                            h4.pink Your items
+                    - for trade in trades
+                        - if trade.state == 'Declined'
+                            .row    
+                                .col-md-12
+                                    hr
+                            .row.items-content
+                                .col-md-12(align="right")
+                                    a.small-link(href="{% url 'delete_trade' trade.id %}") {% trans 'Delete trade' %}
+                                .col-md-6.left
+                                    - if trade.receiver_article.seller.user.id == request.user.id
+                                        - for offer in trade.tradeoffererarticle_set.all
+                                            .row
+                                                .col-md-3
+                                                    img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                                .col-md-9    
+                                                    h2.list_items-tittle {{ offer.article.name }}
+                                                    p.price ${{ offer.article.price }}
+                                                    p.descrip {{ offer.article.description }}
+                                                    a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                    - else
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9
+                                                h2.list_items-tittle {{ trade.receiver_article.name }}
+                                                p.price ${{ trade.receiver_article.price }}
+                                                p.descrip {{ trade.receiver_article.description }}
+                                                a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                                .col-md-6.right
+                                    - if trade.receiver_article.seller.user.id != request.user.id
+                                        - for offer in trade.tradeoffererarticle_set.all
+                                            .row
+                                                .col-md-3
+                                                    img(src="{{ MEDIA_URL }}{{ offer.article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                                .col-md-9    
+                                                    h2.list_items-tittle {{ offer.article.name }}
+                                                    p.price ${{ offer.article.price }}
+                                                    p.descrip {{ offer.article.description }}
+                                                    a.view-item(href="{% url 'product_detail' offer.article.id %}") View item
+                                    - else
+                                        .row
+                                            .col-md-3
+                                                img(src="{{ MEDIA_URL }}{{ trade.receiver_article.imagearticle_set.all.0.image.thumbnail.url }}", width="80")
+                                            .col-md-9
+                                                h2.list_items-tittle {{ trade.receiver_article.name }}
+                                                p.price ${{ trade.receiver_article.price }}
+                                                p.descrip {{ trade.receiver_article.description }}
+                                                a.view-item(href="{% url 'product_detail' trade.receiver_article.id %}") View item
+                                - if trade.state == 'Accepted'
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.acepted-notification.bottom-elements
+                                            - if not trade.buy
+                                                p The user has accepted the trade 
+                                                    i.fa.fa-check
+                                                    |  
+                                                    - if trade.receiver_article.seller.user.id != request.user.id
+                                                        button#stripe_button.btn.cancel(href="#") Confirm trade
+                                            - else 
+                                                p Contact information for this trade has been paid 
+                                                    i.fa.fa-check
+                                            - if not trade.buy
+                                                form#trade_form(style="display:none;", method="post", action="{% url 'buy_article_info' %}")
+                                                    - csrf_token
+                                                    input(name="trade_id", value="{{ trade.id }}")
+                                                    input(name="article_id", value="{{ trade.receiver_article.id }}")
+                                                    input#trade_product_token(name="stripe_token")
+                                - elif trade.state == 'Declined'
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.declined-notification.bottom-elements
+                                            p User has declined the trade 
+                                                i.fa.fa-times
+                                - elif trade.state == 'Pending' and trade.receiver_article.seller.user.id != request.user.id
+                                    .col-md-12.bottom-elements(align="center")
+                                        .col-md-6.col-md-offset-3.pendient-notification.bottom-elements
+                                            p Your request hasn't been answered yet. Please be patient.
+                                - else
+                                    .col-md-12(align="center")
+                                        .col-md-6.col-md-offset-3.bottom-elements
+                                            .col-md-6.text-right
+                                                form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                    - csrf_token
+                                                    input(type="hidden", value="Accepted", name="response")
+                                                    input(type="hidden", value="{{trade.id}}", name="trade")
+                                                    button.btn.confirm(type="submit") Confirm
+                                            .col-md-6.text-left
+                                                form.form-inline(role="form", action="{% url 'respond_trade' %}", method="post")
+                                                    - csrf_token
+                                                    input(type="hidden", value="Declined", name="response")
+                                                    input(type="hidden", value="{{trade.id}}", name="trade")
+                                                    button.btn.cancel(type="submit") Cancel
+
+- block js
+    script(src="https://checkout.stripe.com/checkout.js")
+    script(type="text/javascript")
+        $(document).ready(function() {
+            var handler = StripeCheckout.configure({
+                key:'pk_test_BoW8F6Q7irw3c9bfR2D4HZv6',
+                //key:'pk_live_MWWPMVtTJ3tiOxPLJgjrxemB',
+                image:'{% static "images/logo_stripe.png" %}',
+                token:function(token, args) {
+                    console.log(token);
+                    $('#trade_product_token').val(token.id);
+                    $('#trade_form').submit();
+                }
+            });
+            $('#stripe_button').click(function(e) {
+                e.preventDefault();
+                handler.open({
+                    name:'Equallo',
+                    description:'1 contact ($1.99)',
+                    amount:199,
+                    panelLabel:'Pay',
+                    billingAddress:true,
+                    shippingAddress:true,
+                    email:'{{ request.user.email }}',
+                });
+            });
+        });

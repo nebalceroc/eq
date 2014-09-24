@@ -1,0 +1,50 @@
+- load i18n
+
+.modal.fade#trade_modal(tabindex="-1", role="dialog", aria-labelledby="trade_modal_label", aria-hidden="true")
+  .modal-dialog
+    .modal-content
+      .modal-header
+        .close(data-dismiss="modal")
+      .modal-body.con-borde
+        form#trade_modal_form(role="form", action="{% url 'propose_trade' %}", method="post")
+          - csrf_token
+          input#item_id(type="hidden", name="article_id")
+          input#user_items_trade(type="hidden", name="user_articles")
+          h3.titular-seccion#trade_modal_label
+            span {% trans 'Trade selection' %}
+          .row.modal-body-content
+            .col-md-6.text-center
+              h4.product-detail-tittle.text-left#trade_product_name
+              img#trade_product_image
+              p.prod-price#trade_product_price
+            .col-md-6.trades
+              h4.tittle-trade {% trans 'Select your products to trade' %}:
+              - if user_items
+                ul.list-group.scroll-menu.trade-product-list#user_items_list
+                  - for item in user_items
+                    li.list-group-items
+                      .row
+                        .col-md-4
+                          img(src="{{ MEDIA_URL }}{{ item.imagearticle_set.all.0.image.thumbnail.url }}", width="60")
+                        .col-md-8
+                          .col-md-12
+                            h5.trade-product-tittle {{ item.name }}
+                          .col-md-8
+                            p.trade-product-price ${{ item.price }}
+                          .col-md-4
+                            .checkbox
+                              input(type="checkbox", id="check-{{ item.id }}", value="{{ item.id }}")
+                              label(for="check-{{ item.id }}")
+              - else
+                .alert.alert-danger.text-center {% trans 'You have no items to trade' %}
+              p.legal-buy You are about to buy the contact information of this member. Please remember that you're buying the contact information NOT the product!
+              - if request.user.is_authenticated
+                .col-md-12
+                  #trade_product_user.contact-info
+          .row.text-center.transaction-cost
+            p.cost-tran The cost of this transaction is
+            p.price-tran $1.99
+          .row.text-center
+            - if user_items
+              button.btn.confirm(type="submit") {% trans 'Confirm' %}
+            button.btn.cancel(type="button", data-dismiss="modal") {% trans 'Cancel' %}

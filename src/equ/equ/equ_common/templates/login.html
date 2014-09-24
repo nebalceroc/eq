@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href='{% static "css/especificos_listing.css" %}'/>
+{% endblock extra_head %}
+
+
+{% block content%}
+<section class="presenta">
+    <div class="arriba">
+    	<a id="logo_barra" href="#"><img id="circles_ani" src='{% static "images/logo_circles.png" %}'><img id="equallo" src='{% static "images/logo_sin_circle.png" %}'></a>
+        <div class="texto-header">
+            <h1>Sign in / Sign up</h1>
+            <p>In Equallo we're creating the biggest trading community to encourage users to trade useful items they don’t use anymore. We are offering a new tool to help you upload your catalogue of products that might interest somebody else and ViceVersa. We're giving you the chance to promote it for free trading or selling according to your needs and preferences.</p>
+        </div>
+    </div>
+</section>
+<div class="login-wrap">
+    <div class="social-login">
+        <h2 class="login-tittle">Connect with Your Social Network
+            <span>Coming soon!</span>
+        </h2>
+        <div class="fb login"><a href='#'><img src='{% static "images/fb-login.png" %}'></a></div>
+        <div class="tw login"><a href='#'><img src='{% static "images/tw-login.png" %}'></a></div>
+        <div class="go login"><a href='#'><img src='{% static "images/go-login.png" %}'></a></div>
+    </div>
+    <form id="log" class="ff-login" method="POST">
+        <h2 class="login-tittle">Already a user?<span> Sign in here!</span></h2>
+        {% if message %}
+            <div class="alert alert-danger error-form-register">{{ message }}</div>
+        {% endif %}
+        {% csrf_token %}
+        {% for field in login %}
+            <div>
+                <div class="user-wrap">
+                    <label>
+                        {{ field.label }}:
+                    </label>
+                    {{ field }}
+                </div>
+            </div>
+        {% endfor %}
+        <ul class="questions">
+            <li><a href="#" data-toggle="modal" data-target="#forgot_password_modal">Forgot your password?</a></li>
+        </ul>
+        <button type="submit" class="btn login">Sign in</button>
+    </form>
+    <form class="ff-register" action="{% url 'register' %}" method="POST" >
+        <h2 class="login-tittle">New to Equallo?<span> Sign up now</span></h2>
+        {% if messageReg %}
+            <div class="alert alert-danger error-form-register">{{ messageReg }}</div>
+        {% endif %}
+        {% csrf_token %}
+        {% for field2 in auth_basic %}
+            <div class="line user-wrap {% if field2.errors %}error{% endif %}">
+                 <label for="user-register">
+                     {{ field2.label }}
+                </label>
+                {{ field2 }}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn register">Sign Up Now !</button>
+    </form>
+</div>
+{% include 'modal_forgot_password.jade' %}
+{% endblock %}
