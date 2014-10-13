@@ -63,6 +63,16 @@ def RegisterUser(request):
                     user_auth = authenticate(identification=user.email, check_password=False)
                     if user_auth is not None:
                         login(request,user_auth)
+                        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                        if x_forwarded_for:
+                            ip = x_forwarded_for.split(',')[0]
+                        else:
+                            ip = request.META.get('REMOTE_ADDR')
+ 
+                        g = GeoIP()
+                        lat,lon = g.lat_lon(ip)
+                        #lat,lon = g.lat_lon('186.83.0.68')
+                        UserProfile.objects.filter(user=user).update(coords = 'POINT(' + str(lon) +' ' +str(lat)+ ')')
                         request.session['register'] = True
                         return redirect("/change_user/")
                     else:
@@ -105,8 +115,8 @@ def LoginUser(request):
                     ip = request.META.get('REMOTE_ADDR')
  
                 g = GeoIP()
-                #lat,lon = g.lat_lon(ip)
-                lat,lon = g.lat_lon('186.83.0.68')
+                lat,lon = g.lat_lon(ip)
+                #lat,lon = g.lat_lon('186.83.0.68')
                 UserProfile.objects.filter(user=user).update(coords = 'POINT(' + str(lon) +' ' +str(lat)+ ')')
                 return redirect(url_redirect)
             else:
