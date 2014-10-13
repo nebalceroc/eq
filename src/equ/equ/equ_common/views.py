@@ -338,6 +338,7 @@ This function search and make the pagination in the web site
 def Busqueda(request):
     search = request.GET['q']
     articles = list()
+    article_dictionary = []
     if request.user.is_authenticated():
         seller = UserProfile.objects.filter(user=request.user)
         articles.extend(list(Article.objects.filter(name__icontains=search).exclude(seller=seller)))
@@ -346,6 +347,7 @@ def Busqueda(request):
         articles.extend(list(Article.objects.filter(name__icontains=search)))
         articles.extend(list(Article.objects.filter(description__icontains=search)))
     categories = Category.objects.filter(name_category__icontains=search)
+    
     for cat in categories:
         if request.user.is_authenticated():
             seller = UserProfile.objects.filter(user=request.user)
@@ -354,10 +356,13 @@ def Busqueda(request):
             articles.extend(list(Article.objects.filter(category=cat)))
             
 
-    
-    article_dictionary = []
     for article in list(set(articles)):
-        article_dictionary.append(get_article_dictionary(article,request.user.userprofile.coords.distance(article.seller.coords)))
+        if request.user.is_authenticated():
+            article_dictionary.append(get_article_dictionary(article,request.user.userprofile.coords.distance(article.seller.coords)))
+        else:
+            article_dictionary.append(get_article_dictionary(article,0))
+
+    
 
     #data = { 'articles':list(set(articles)) }
     data = { 'articles':article_dictionary }
