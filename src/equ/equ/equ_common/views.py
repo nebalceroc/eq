@@ -59,16 +59,6 @@ def RegisterUser(request):
             except Exception as e:
                 if 'does not exist' in str(e):
                     user=user_form.save()
-                    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-                    if x_forwarded_for:
-	                ip = x_forwarded_for.split(',')[0]
-                    else:
-                        ip = request.META.get('REMOTE_ADDR')
-
-                    g = GeoIP()
-                    lat,lon = g.lat_lon(ip)
-                    user.coords = 'POINT(' + str(lon) +' ' +str(lat)+ ')'
-                    user.save()
                     user_auth = authenticate(identification=user.email, check_password=False)
                     if user_auth is not None:
                         login(request,user_auth)
@@ -107,7 +97,17 @@ def LoginUser(request):
             user = authenticate(identification=username, password=password)
             if user is not None:
                 login(request,user)
-                return redirect(url_redirect)
+		x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    ip = x_forwarded_for.split(',')[0]
+                else:
+                    ip = request.META.get('REMOTE_ADDR')
+ 
+                g = GeoIP()
+                lat,lon = g.lat_lon(ip)
+                UserProfile.objects.filter(user=user).update(coords = 'POINT(' + str(lon) +' ' +str(lat)+ ')')
+                #return redirect(UserProfile.objects.get(user=user).coords)
+		return redirect(url_redirect)
             else:
                 diccionary = {'message':'Invalid information', 'login':login_form, 'auth_basic':auth_basic_form, }
         else:
