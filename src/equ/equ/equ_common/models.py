@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from django.contrib.gis.db.models import PointField, GeoManager
+from django.contrib.gis.geos import GEOSGeometry, fromstr
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -28,6 +30,8 @@ class UserProfile(UserenaBaseProfile):
     terms = models.BooleanField(_('terms'),default=False)
     welcome = models.BooleanField(default=False)
     categories = models.ManyToManyField(Category)
+    coords = PointField(null=True)
+    objects = GeoManager()
 
 """
 This is the atributtes of a article.

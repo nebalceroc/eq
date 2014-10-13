@@ -17,8 +17,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'equ.db',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': r'/home/equallo/eq/src/equ/equ.db',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -121,7 +121,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, '..', '..', 'static_media', 'media')
+MEDIA_ROOT = r'/home/equallo/eq/src/static_media/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -228,7 +228,7 @@ INSTALLED_APPS = (
     'userena',
     'guardian',
     'easy_thumbnails',
-    #'haystack',
+    # 'haystack',
     'social_auth',
     'pyjade',
     'multiuploader',
@@ -237,6 +237,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django.contrib.gis',
 )
 
 # Email Backend server with PostMark
@@ -304,3 +305,5 @@ READABILITY_CONSUMER_SECRET  = ''
 USERENA_ACTIVATION_REQUIRED = False
 
 DEFAULT_FILE_STORAGE = 'equ_common.helpers.ASCIIFileSystemStorage'
+
+GEOIP_PATH = r"/usr/local/lib/python2.7/dist-packages/geoip2"

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- 
+from django.contrib.gis.geos import GEOSGeometry
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required 
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from datetime import date
 from equ_common.models import UserProfile, ImageArticle, Article, Category, Trade, TradeOffererArticle
 from equ_common.forms import Article_New
@@ -13,6 +15,7 @@ from userena.forms import SignupFormOnlyEmail, AuthenticationForm
 from helpers import init_categories
 import datetime
 from django.core.urlresolvers import reverse
+from django.contrib.gis.geoip import GeoIP
 
 """
 This view return the call to index,html
@@ -56,6 +59,16 @@ def RegisterUser(request):
             except Exception as e:
                 if 'does not exist' in str(e):
                     user=user_form.save()
+                    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                    if x_forwarded_for:
+	                ip = x_forwarded_for.split(',')[0]
+                    else:
+                        ip = request.META.get('REMOTE_ADDR')
+
+                    g = GeoIP()
+                    lat,lon = g.lat_lon(ip)
+                    user.coords = 'POINT(' + str(lon) +' ' +str(lat)+ ')'
+                    user.save()
                     user_auth = authenticate(identification=user.email, check_password=False)
                     if user_auth is not None:
                         login(request,user_auth)
@@ -112,6 +125,7 @@ def LoginUser(request):
 This function do logout of an user
 """
 def Logout_User(request):
+    #return HttpResponse(UserProfile.objects.get(user=request.user).coords)
     logout(request)
     return redirect('/')
 
@@ -127,7 +141,7 @@ def ArticleUp(request):
         if len(categories_arr) > 0 and len(request.FILES) > 0 and article_form.is_valid():
             user = UserProfile.objects.filter(user_id=request.user.id)[0]
             article = Article.objects.create(name=request.POST['name'], description=request.POST['description'], price=request.POST['price'], seller=user, date=datetime.datetime.now())
-            
+            #article = Article.objects.create(name=request.POST['name'], description=user.coords, price=request.POST['price'], seller=user, date=datetime.datetime.now())
             for i in range(len(request.FILES)):
                 image = ImageArticle.objects.create(key_article=article, image=request.FILES['imgup-{0}'.format(i)])
                 article.imagearticle_set.add(image)
@@ -422,7 +436,7 @@ def respond_trade(request):
         else:
             message = 'We\'re sorry, your trade for {0} has been declined. Maybe try another item?\n\nRegards,\n\nThe Equallo team'.format(trade.receiver_article.name)
             message_file = '<p style="margin-bottom:15px">We\'re sorry, your trade for {0} has been declined. Maybe try another item?</p><p style="margin-bottom:15px">Regards,</p><p style="margin-bottom:15px">The Equallo team</p>'.format(trade.receiver_article.name)
-        message_html = open(os.path.dirname(os.path.abspath('./equ/equ_common/static/files/trade_email.html'))+'/trade_email.html').read()
+        message_html = open(r'/home/equallo/eq/src/equ/equ/equ_common/static/files/trade_email.html').read()
         message_html = message_html.replace('{{message}}',message_file)
         email_offerer = EmailMultiAlternatives('Trade result', message, settings.DEFAULT_FROM_EMAIL, [trade.tradeoffererarticle_set.all()[0].article.seller.user.email])
         email_offerer.attach_alternative(message_html, 'text/html')
@@ -451,7 +465,7 @@ def create_trade(request):
                 trade.tradeoffererarticle_set.add(offer)
             message = 'Your item is wanted!\n\nYou have received a trade for {0}.\n\nPlease log in to Equallo to receive further information.\n\nRegards,\n\nThe Equallo team'.format(receiver.name)
             message_file = '<p style="margin-bottom:15px">Your item is wanted!</p><p style="margin-bottom:15px">You have received a trade for {0}.</p><p style="margin-bottom:15px">Please log in to Equallo to receive further information.</p><p style="margin-bottom:15px">Regards,</p><p style="margin-bottom:15px">The Equallo team</p>'.format(receiver.name)
-            message_html = open(os.path.dirname(os.path.abspath('./equ/equ_common/static/files/new_trade_email.html'))+'/new_trade_email.html').read()
+            message_html = open(r'/home/equallo/eq/src/equ/equ/equ_common/static/files/new_trade_email.html').read()
             message_html = message_html.replace('{{message}}',message_file)
             email_receiver = EmailMultiAlternatives('New trade received', message, settings.DEFAULT_FROM_EMAIL, [receiver.seller.user.email])
             email_receiver.attach_alternative(message_html, 'text/html')
@@ -495,9 +509,9 @@ def buy_article_information(request):
                 trade.buy = buy
                 trade.save()
             request.session['message'] = 'Congratulations! Your payment was approved. You\'ll receive an email with the article\'s information'
-            message_html = open(os.path.dirname(os.path.abspath('./equ/equ_common/static/files/buy_email.html'))+'/buy_email.html').read().decode('utf8')
-            message_html = message_html.replace('{{first_name}}',article.seller.user.first_name.encode('utf8')).replace('{{last_name}}',article.seller.user.last_name.encode('utf8')).replace('{{city}}',article.seller.city).replace('{{mobile}}', str(article.seller.celular)).replace('{{email}}', article.seller.user.email.encode('utf8'))
-            message_text = 'Congratulations!\n\nYou have just bought the following contact information:\n\nContact name: {0} {1}\nContact location:{2}\nContact mobile:{3}\nContact email:{4}'.format(article.seller.user.first_name.encode('utf8'), article.seller.user.last_name.encode('utf8'), article.seller.city.encode('utf8'), str(article.seller.celular), article.seller.user.email.encode('utf8'))
+            message_html = open(r'/home/equallo/eq/src/equ/equ/equ_common/static/files/buy_email.html').read().decode('utf8')
+            message_html = message_html.replace('{{first_name}}',article.seller.user.first_name.decode('cp437').encode('utf8')).replace('{{last_name}}',article.seller.user.last_name.decode('cp437').encode('utf8')).replace('{{city}}',article.seller.city).replace('{{mobile}}', str(article.seller.celular)).replace('{{email}}', article.seller.user.email.encode('utf8'))
+            message_text = 'Congratulations!\n\nYou have just bought the following contact information:\n\nContact name: {0} {1}\nContact location:{2}\nContact mobile:{3}\nContact email:{4}'.format(article.seller.user.first_name.decode().encode('utf8'), article.seller.user.last_name.decode().encode('utf8'), article.seller.city.decode().encode('utf8'), str(article.seller.celular), article.seller.user.email.encode('utf8'))
             send_email = EmailMultiAlternatives('Buy result', message_text, settings.DEFAULT_FROM_EMAIL, [user.user.email])
             send_email.attach_alternative(message_html, 'text/html')
             send_email.send(fail_silently=False)
@@ -519,7 +533,7 @@ def forgot_password(request, forgot_key=None):
                 message = 'http://localhost:8000/forgot_password/{0}/'.format(forgot_key)
             else:
                 message = 'http://www.equallo.com/forgot_password/{0}/'.format(forgot_key)
-            message_html = open(os.path.dirname(os.path.abspath('./equ/equ_common/static/files/forgot_password_email.html'))+'/forgot_password_email.html').read()
+            message_html = open(r'/home/equallo/eq/src/equ/equ/equ_common/static/files/forgot_password_email.html').read()
             message_html = message_html.replace('{{message}}',message)
             message_text = 'Forgot your password?\n\nPlease click the following link to set a new one.\n\n{0}'.format(message)
             send_email = EmailMultiAlternatives('Password reset', message_text, settings.DEFAULT_FROM_EMAIL, [email])
