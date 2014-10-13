@@ -6,6 +6,8 @@ function sortBy(sort) {
         array.sort(sortByLowerPrice);
     else if(sort == 3)
         array.sort(sortByHigherPrice);
+    else if(sort == 4)
+        array.sort(sortByLessDistance);
     $('#results-list').empty();
     $(array).each(function(i,a) {
         $('#results-list').append(a);
@@ -28,4 +30,10 @@ function sortByHigherPrice(a,b) {
     var price_a = parseInt($(a).find('.product-price .item-price-value').text(), 10);
     var price_b = parseInt($(b).find('.product-price .item-price-value').text(), 10);
     return price_b - price_a;
+}
+
+function sortByLessDistance(a,b) {
+    var distance_a = parseInt($(a).find('.product-description-thumb .item-distance').val());
+    var distance_b = parseInt($(b).find('.product-description-thumb .item-distance').val());
+    return distance_a - distance_b;
 }

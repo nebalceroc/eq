@@ -9,6 +9,8 @@ import os
 def send_welcome_email(sender, instance, created, **kwargs):
 	if created and not instance.welcome:
 		message_html = open(r'/home/equallo/eq/src/equ/equ/equ_common/static/files/welcome_email.html').read()
+		#message_html = open(r'/home/nicolas/git/equ_project/equ_project/src/equ/equ/equ_common/static/files/welcome_email.html').read()
+		
 		message_html = message_html.replace('{{ username }}',instance.user.email.encode('utf8'))
 		message = 'The Equallo team welcomes you to our service. We hope Equallo helps you find what you are looking for.\n\nEnjoy!\n\nRegards,\n\nThe Equallo team'
 		email = EmailMultiAlternatives('Welcome to Equallo!', message, settings.DEFAULT_FROM_EMAIL, [instance.user.email])

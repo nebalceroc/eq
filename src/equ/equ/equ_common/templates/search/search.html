@@ -69,6 +69,7 @@
                     <option value="1">Recently Added</option>
                     <option value="2">Price: Lowest First</option>
                     <option value="3">Price: Highest First</option>
+                    <option value="4">Distance: nearest</option>
                 </select>
             </div>
         </div>
@@ -80,27 +81,28 @@
                     {% for result in articles %}
                         <div class="row">
                             <div class="product-image-thumb col-md-4">
-                                <a href="{% url 'product_detail' result.id %}">
-                                    <img id="prodimg-{{ result.id }}" src="{{ MEDIA_URL }}{{ result.imagearticle_set.all.0.image.small.url }}">
+                                <a href="{% url 'product_detail' result.article.id %}">
+                                    <img id="prodimg-{{ result.article.id }}" src="{{ MEDIA_URL }}{{ result.article.imagearticle_set.all.0.image.small.url }}">
                                 </a>
                             </div>
                             <div class="product-description-thumb col-md-5">
-                                <h2><a href="/product_detail/{{ result.id }}" id="prodname-{{ result.id }}">{{ result.name }}</a></h2>
-                                <p id="proddesc-{{ result.id }}">{{ result.description }}</p>
-                                <input id="proddate-{{result.id}}" type="hidden" class="item-date" value="{{ result.date }}" >
-                                <input id="prodloc-{{ result.id }}" type="hidden" value="{{result.seller.city }}, {{ result.seller.state }}">
-                                <input id="produser-{{ result.id }}" type="hidden" value="{{result.seller.user.first_name }}, {{ result.seller.user.last_name }}">
+                                <h2><a href="/product_detail/{{ result.article.id }}" id="prodname-{{ result.article.id }}">{{ result.article.name }}</a></h2>
+                                <p id="proddesc-{{ result.article.id }}">{{ result.article.description }}</p>
+                                <input id="proddate-{{result.article.id}}" type="hidden" class="item-date" value="{{ result.article.date }}" >
+                                <input id="proddistance-{{result.article.id}}" type="hidden" class="item-distance" value="{{ result.distance }}" >
+                                <input id="prodloc-{{ result.article.id }}" type="hidden" value="{{result.article.seller.city }}, {{ result.article.seller.state }}">
+                                <input id="produser-{{ result.article.id }}" type="hidden" value="{{result.article.seller.user.first_name }}, {{ result.article.seller.user.last_name }}">
                             </div>
                             <div class="product-price col-md-3">
                                 <span>Price</span>
-                                <span class="price">$<span class="item-price-value" id="prodprice-{{ result.id }}">{{ result.price }}</span></span>
-                                {% if result.seller.user.id != request.user.id %}
+                                <span class="price">$<span class="item-price-value" id="prodprice-{{ result.article.id }}">{{ result.article.price }}</span></span>
+                                {% if result.article.seller.user.id != request.user.id %}
                                     {% if request.user.is_authenticated %}
-                                        <a href="#" onclick="load_trade_modal('{{result.id}}')" data-target="#trade_modal" class="btn_exchange" data-toggle="modal">Trade it</a>
+                                        <a href="#" onclick="load_trade_modal('{{result.article.id}}')" data-target="#trade_modal" class="btn_exchange" data-toggle="modal">Trade it</a>
                                     {% else %}
-                                        <a href="{% url 'login' %}?next={{ request.get_full_path }}" class="btn_exchange">Trade it</a>
+                                        <a href="{% url 'login' %}?next={{ request.article.get_full_path }}" class="btn_exchange">Trade it</a>
                                     {% endif %}
-                                    <a href="#" onclick="load_buy_modal('{{result.id}}')" data-target="#buy_modal" class="btn_buy" data-toggle="modal">Buy it</a>
+                                    <a href="#" onclick="load_buy_modal('{{result.article.id}}')" data-target="#buy_modal" class="btn_buy" data-toggle="modal">Buy it</a>
                                 {% endif %}
                             </div>
                         </div>

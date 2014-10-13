@@ -19,6 +19,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.spatialite', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': r'/home/equallo/eq/src/equ/equ.db',                      # Or path to database file if using sqlite3.
+        #'NAME': r'/home/nicolas/git/equ_project/equ_project/src/equ/equ.db',
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -122,6 +123,7 @@ USE_TZ = True
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
 MEDIA_ROOT = r'/home/equallo/eq/src/static_media/media/'
+#MEDIA_ROOT = r'/home/nicolas/git/equ_project/equ_project/src/static_media/media/'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
